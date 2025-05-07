@@ -18,6 +18,7 @@ from ament_index_python.packages import get_package_share_directory
 
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, GroupAction, SetEnvironmentVariable
+from launch_ros.actions import PushROSNamespace
 from launch.conditions import IfCondition
 from launch.substitutions import LaunchConfiguration, PythonExpression
 from launch_ros.actions import LoadComposableNodes, SetParameter
@@ -43,11 +44,11 @@ def generate_launch_description():
     lifecycle_nodes = [
         # 'controller_server',
         # 'smoother_server',
-        'planner_server',
+        # 'planner_server',
         # 'behavior_server',
         # 'velocity_smoother',
         # 'collision_monitor',
-        # 'bt_navigator',
+        'bt_navigator',
         # 'waypoint_follower',
         # 'docking_server',
     ]
@@ -121,20 +122,27 @@ def generate_launch_description():
         'log_level', default_value='info', description='log level'
     )
 
+    bt_xml_file = os.path.join(
+        get_package_share_directory('atlas_bringup'),
+        'behavior_trees',
+        'hello_world.xml',
+    )
+
     load_nodes = GroupAction(
         condition=IfCondition(PythonExpression(['not ', use_composition])),
         actions=[
+            # PushROSNamespace('atlas'),
             SetParameter('use_sim_time', use_sim_time),
-            Node(
-                package='nav2_controller',
-                executable='controller_server',
-                output='screen',
-                respawn=use_respawn,
-                respawn_delay=2.0,
-                parameters=[configured_params],
-                arguments=['--ros-args', '--log-level', log_level],
-                remappings=remappings + [('cmd_vel', 'cmd_vel_nav')],
-            ),
+            # Node(
+            #     package='nav2_controller',
+            #     executable='controller_server',
+            #     output='screen',
+            #     respawn=use_respawn,
+            #     respawn_delay=2.0,
+            #     parameters=[configured_params],
+            #     arguments=['--ros-args', '--log-level', log_level],
+            #     remappings=remappings + [('cmd_vel', 'cmd_vel_nav')],
+            # ),
             # Node(
             #     package='nav2_smoother',
             #     executable='smoother_server',
@@ -168,17 +176,17 @@ def generate_launch_description():
             #     arguments=['--ros-args', '--log-level', log_level],
             #     remappings=remappings + [('cmd_vel', 'cmd_vel_nav')],
             # ),
-            # Node(
-            #     package='nav2_bt_navigator',
-            #     executable='bt_navigator',
-            #     name='bt_navigator',
-            #     output='screen',
-            #     respawn=use_respawn,
-            #     respawn_delay=2.0,
-            #     parameters=[configured_params],
-            #     arguments=['--ros-args', '--log-level', log_level],
-            #     remappings=remappings,
-            # ),
+            Node(
+                package='nav2_bt_navigator',
+                executable='bt_navigator',
+                name='bt_navigator',
+                output='screen',
+                respawn=use_respawn,
+                respawn_delay=2.0,
+                parameters=[configured_params] + [{'default_nav_to_pose_bt_xml': bt_xml_file}],
+                arguments=['--ros-args', '--log-level', log_level],
+                remappings=remappings,
+            ),
             # Node(
             #     package='nav2_waypoint_follower',
             #     executable='waypoint_follower',

@@ -1,0 +1,11 @@
+
+<!--
+  This Behavior Tree prints Hello World periodically at 1 Hz
+-->
+<root BTCPP_format="4" main_tree_to_execute="MainTree">
+  <BehaviorTree ID="MainTree">
+    <RateController hz="1.0">
+      <HelloWorldAction/>
+    </RateController>
+  </BehaviorTree>
+</root>

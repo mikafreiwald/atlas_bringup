@@ -1,15 +1,22 @@
 cmake_minimum_required(VERSION 3.8)
 project(atlas_bringup)
 
+if(NOT CMAKE_C_STANDARD)
+  set(CMAKE_C_STANDARD 99)
+endif()
+if(NOT CMAKE_CXX_STANDARD)
+  set(CMAKE_CXX_STANDARD 17)
+endif()
+
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
-# uncomment the following section in order to fill in
-# further dependencies manually.
-# find_package(<dependency> REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(nav2_core REQUIRED)
+find_package(nav2_behaviors REQUIRED)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -23,12 +30,46 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 
+add_library(hello_world_action SHARED
+  src/hello_world_action.cpp
+)
+target_include_directories(hello_world_action PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>"
+)
+target_link_libraries(hello_world_action PUBLIC
+  behaviortree_cpp::behaviortree_cpp
+  nav2_util::nav2_util_core
+  rclcpp::rclcpp
+  rclcpp_action::rclcpp_action
+  rclcpp_lifecycle::rclcpp_lifecycle
+)
+
+# necessary for macro BT_REGISTER_NODES to export function
+target_compile_definitions(hello_world_action PRIVATE BT_PLUGIN_EXPORT)
+
+install(
+  TARGETS hello_world_action
+  EXPORT export_${PROJECT_NAME}
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  RUNTIME DESTINATION bin
+)
+
+install(DIRECTORY include/
+  DESTINATION include/
+)
+
 install(DIRECTORY
   config
   launch
   models
   worlds
+  behavior_trees
   DESTINATION share/${PROJECT_NAME}/
 )
 
+ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
+# ament_export_targets(hello_world_action HAS_LIBRARY_TARGET)
+# ament_export_dependencies()
 ament_package()
