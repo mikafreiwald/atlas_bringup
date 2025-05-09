@@ -1,0 +1,5 @@
+<library path="nav2_elevation_costmap_plugin_core">
+  <class type="atlas_bringup::ElevationLayer" base_class_type="nav2_costmap_2d::Layer">
+    <description>ad_ros2 elevation_layer</description>
+  </class>
+</library>

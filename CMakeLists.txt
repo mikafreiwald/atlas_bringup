@@ -16,7 +16,9 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(nav2_core REQUIRED)
-find_package(nav2_behaviors REQUIRED)
+find_package(nav2_behavior_tree REQUIRED)
+find_package(nav2_costmap_2d REQUIRED)
+find_package(ad_ros2 REQUIRED)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -69,6 +71,7 @@ install(DIRECTORY
   DESTINATION share/${PROJECT_NAME}/
 )
 
+pluginlib_export_plugin_description_file(nav2_costmap_2d elevation_layer.xml)
 ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
 # ament_export_targets(hello_world_action HAS_LIBRARY_TARGET)
 # ament_export_dependencies()
