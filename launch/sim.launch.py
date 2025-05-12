@@ -10,16 +10,16 @@ from launch_ros.actions import Node
 
 def generate_launch_description():
 
-    # mrg_slam_sim_world = IncludeLaunchDescription(
-    #     PythonLaunchDescriptionSource([os.path.join(
-    #         get_package_share_directory('mrg_slam_sim'), 'launch', 'marsyard2020.launch.py'
-    #     )])
-    # )
+    package_share_dir = get_package_share_directory('atlas_bringup')
 
-    mrg_slam_sim_world = IncludeLaunchDescription(
+    # sdf file needs to have <world name="marsyard2020"> for mrg_slam to work
+    gz_sim = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([os.path.join(
-            get_package_share_directory('atlas_bringup'), 'launch', 'marsyard2022.launch.py'
-        )])
+            package_share_dir, 'launch', 'gz.launch.py'
+        )]),
+        launch_arguments={
+            'sdf_file': os.path.join(package_share_dir, 'worlds', 'warehouse.sdf')
+        }.items()
     )
 
     mrg_slam_sim_robot = IncludeLaunchDescription(
@@ -44,7 +44,7 @@ def generate_launch_description():
     )
 
     return LaunchDescription([
-        mrg_slam_sim_world,
+        gz_sim,
         mrg_slam_sim_robot,
         mrg_slam,
         ad_ros2_mapping
