@@ -40,17 +40,19 @@ def generate_launch_description():
     container_name_full = (namespace, '/', container_name)
     use_respawn = LaunchConfiguration('use_respawn')
     log_level = LaunchConfiguration('log_level')
+    map_file = LaunchConfiguration('map_file')
 
     lifecycle_nodes = [
-        # 'controller_server',
+        'controller_server',
         # 'smoother_server',
-        # 'planner_server',
-        # 'behavior_server',
+        'planner_server',
+        'behavior_server',
         # 'velocity_smoother',
         # 'collision_monitor',
         'bt_navigator',
         # 'waypoint_follower',
         # 'docking_server',
+        'map_server',
     ]
 
     # Map fully qualified names to relative ones so the node's namespace can be prepended.
@@ -122,10 +124,16 @@ def generate_launch_description():
         'log_level', default_value='info', description='log level'
     )
 
+    declare_map_file_cmd = DeclareLaunchArgument(
+        'map_file',
+        default_value=os.path.join(bringup_dir, 'maps', 'warehouse_map_save.yaml'),
+        description='Map yaml file'
+    )
+
     bt_xml_file = os.path.join(
         get_package_share_directory('atlas_bringup'),
         'behavior_trees',
-        'hello_world.xml',
+        'compute_path_to_pose.xml',
     )
 
     load_nodes = GroupAction(
@@ -133,16 +141,16 @@ def generate_launch_description():
         actions=[
             # PushROSNamespace('atlas'),
             SetParameter('use_sim_time', use_sim_time),
-            # Node(
-            #     package='nav2_controller',
-            #     executable='controller_server',
-            #     output='screen',
-            #     respawn=use_respawn,
-            #     respawn_delay=2.0,
-            #     parameters=[configured_params],
-            #     arguments=['--ros-args', '--log-level', log_level],
-            #     remappings=remappings + [('cmd_vel', 'cmd_vel_nav')],
-            # ),
+            Node(
+                package='nav2_controller',
+                executable='controller_server',
+                output='screen',
+                respawn=use_respawn,
+                respawn_delay=2.0,
+                parameters=[configured_params],
+                arguments=['--ros-args', '--log-level', log_level],
+                remappings=remappings + [('cmd_vel', 'atlas/cmd_vel')],
+            ),
             # Node(
             #     package='nav2_smoother',
             #     executable='smoother_server',
@@ -154,28 +162,28 @@ def generate_launch_description():
             #     arguments=['--ros-args', '--log-level', log_level],
             #     remappings=remappings,
             # ),
-            # Node(
-            #     package='nav2_planner',
-            #     executable='planner_server',
-            #     name='planner_server',
-            #     output='screen',
-            #     respawn=use_respawn,
-            #     respawn_delay=2.0,
-            #     parameters=[configured_params],
-            #     arguments=['--ros-args', '--log-level', log_level],
-            #     remappings=remappings,
-            # ),
-            # Node(
-            #     package='nav2_behaviors',
-            #     executable='behavior_server',
-            #     name='behavior_server',
-            #     output='screen',
-            #     respawn=use_respawn,
-            #     respawn_delay=2.0,
-            #     parameters=[configured_params],
-            #     arguments=['--ros-args', '--log-level', log_level],
-            #     remappings=remappings + [('cmd_vel', 'cmd_vel_nav')],
-            # ),
+            Node(
+                package='nav2_planner',
+                executable='planner_server',
+                name='planner_server',
+                output='screen',
+                respawn=use_respawn,
+                respawn_delay=2.0,
+                parameters=[configured_params],
+                arguments=['--ros-args', '--log-level', log_level],
+                remappings=remappings,
+            ),
+            Node(
+                package='nav2_behaviors',
+                executable='behavior_server',
+                name='behavior_server',
+                output='screen',
+                respawn=use_respawn,
+                respawn_delay=2.0,
+                parameters=[configured_params],
+                arguments=['--ros-args', '--log-level', log_level],
+                remappings=remappings + [('cmd_vel', 'atlas/cmd_vel')],
+            ),
             Node(
                 package='nav2_bt_navigator',
                 executable='bt_navigator',
@@ -183,7 +191,7 @@ def generate_launch_description():
                 output='screen',
                 respawn=use_respawn,
                 respawn_delay=2.0,
-                parameters=[configured_params] + [{'default_nav_to_pose_bt_xml': bt_xml_file}],
+                parameters=[configured_params], # + [{'default_nav_to_pose_bt_xml': bt_xml_file}],
                 arguments=['--ros-args', '--log-level', log_level],
                 remappings=remappings,
             ),
@@ -233,6 +241,17 @@ def generate_launch_description():
             #     remappings=remappings,
             # ),
             Node(
+                package='nav2_map_server',
+                executable='map_server',
+                name='map_server',
+                output='screen',
+                parameters=[{
+                    'yaml_filename': map_file,
+                    'topic_name': '/atlas/map',
+                    'frame_id': '/atlas/map'
+                }]
+            ),
+            Node(
                 package='nav2_lifecycle_manager',
                 executable='lifecycle_manager',
                 name='lifecycle_manager_navigation',
@@ -258,6 +277,7 @@ def generate_launch_description():
     ld.add_action(declare_container_name_cmd)
     ld.add_action(declare_use_respawn_cmd)
     ld.add_action(declare_log_level_cmd)
+    ld.add_action(declare_map_file_cmd)
     # Add the actions to launch all of the navigation nodes
     ld.add_action(load_nodes)
 
