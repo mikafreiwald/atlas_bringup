@@ -1,0 +1,9 @@
+
+<!--
+  This Behavior Tree computes the path to the pose.
+-->
+<root BTCPP_format="4" main_tree_to_execute="MainTree">
+  <BehaviorTree ID="MainTree">
+      <ComputePathToPose goal="{goal}" path="{path}" planner_id="{selected_planner}" /> <!-- error_code_id="{compute_path_error_code}"/> -->
+  </BehaviorTree>
+</root>
