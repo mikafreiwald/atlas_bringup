@@ -67,6 +67,7 @@ install(DIRECTORY
   launch
   models
   worlds
+  maps
   behavior_trees
   DESTINATION share/${PROJECT_NAME}/
 )
