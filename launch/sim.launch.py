@@ -37,6 +37,14 @@ def generate_launch_description():
         }.items()
     )
 
+    rviz = Node(
+        package='rviz2',
+        executable='rviz2',
+        name='rviz2',
+        output='screen',
+        arguments=['-d', os.path.join(package_share_dir, 'config', 'atlas.rviz')]
+    )
+
     ad_ros2_mapping = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([os.path.join(
             get_package_share_directory('ad_ros2'), 'launch', 'local_elevation_mapping.launch.py'
@@ -47,5 +55,6 @@ def generate_launch_description():
         gz_sim,
         mrg_slam_sim_robot,
         mrg_slam,
-        ad_ros2_mapping
+        ad_ros2_mapping,
+        rviz,
     ])
