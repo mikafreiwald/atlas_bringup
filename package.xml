@@ -19,6 +19,7 @@
   <depend>nav2_costmap_2d</depend>
   <depend>ad_ros2</depend>
   <depend>pluginlib</depend>
+  <depend>nav_msgs</depend>
 
   <export>
     <costmap_2d plugin="${prefix}/elevation_layer.xml" />

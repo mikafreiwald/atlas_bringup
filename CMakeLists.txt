@@ -18,6 +18,7 @@ find_package(rclcpp REQUIRED)
 find_package(nav2_core REQUIRED)
 find_package(nav2_behavior_tree REQUIRED)
 find_package(nav2_costmap_2d REQUIRED)
+find_package(nav_msgs REQUIRED)
 find_package(ad_ros2 REQUIRED)
 
 if(BUILD_TESTING)
@@ -31,6 +32,8 @@ if(BUILD_TESTING)
   set(ament_cmake_cpplint_FOUND TRUE)
   ament_lint_auto_find_test_dependencies()
 endif()
+
+#### HelloWorld Action ####
 
 add_library(hello_world_action SHARED
   src/hello_world_action.cpp
@@ -57,6 +60,25 @@ install(
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
 )
+
+#### Elevation Layer ####
+
+add_library(nav2_elevation_costmap_plugin_core SHARED
+  src/elevation_layer.cpp
+)
+ament_target_dependencies(nav2_elevation_costmap_plugin_core
+  rclcpp
+  nav2_core
+  nav2_costmap_2d
+  pluginlib
+  nav_msgs
+)
+include_directories(include)
+install(TARGETS nav2_elevation_costmap_plugin_core
+  DESTINATION lib
+)
+
+
 
 install(DIRECTORY include/
   DESTINATION include/

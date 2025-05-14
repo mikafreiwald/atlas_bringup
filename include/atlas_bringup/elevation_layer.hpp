@@ -1,5 +1,9 @@
 #pragma once
 
+#include <mutex>
+
+#include "rclcpp/rclcpp.hpp"
+#include "nav_msgs/msg/occupancy_grid.hpp"
 #include "nav2_costmap_2d/costmap_layer.hpp"
 
 namespace atlas_bringup
@@ -19,5 +23,13 @@ namespace atlas_bringup
             int min_i, int min_j, int max_i, int max_j) override;
         void reset() override;
         bool isClearable() override;
+
+    private:
+        void gridCallback(const nav_msgs::msg::OccupancyGrid::SharedPtr msg);
+
+        rclcpp::Logger logger_{rclcpp::get_logger("ElevationLayer")};
+        rclcpp::Subscription<nav_msgs::msg::OccupancyGrid>::SharedPtr grid_sub_;
+        std::mutex grid_mutex_;
+        nav_msgs::msg::OccupancyGrid grid_;
     };
 }
