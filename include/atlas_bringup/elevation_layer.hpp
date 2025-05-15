@@ -1,8 +1,12 @@
 #pragma once
 
+#include <memory>
 #include <mutex>
 
 #include "rclcpp/rclcpp.hpp"
+#include "message_filters/subscriber.h"
+#include "message_filters/pass_through.h"
+
 #include "nav_msgs/msg/occupancy_grid.hpp"
 #include "nav2_costmap_2d/costmap_layer.hpp"
 
@@ -13,6 +17,9 @@ namespace atlas_bringup
     public:
         ElevationLayer();
         ~ElevationLayer() override;
+
+        void deactivate() override;
+        void activate() override;
 
         void onInitialize() override;
         void updateBounds(
@@ -28,8 +35,10 @@ namespace atlas_bringup
         void gridCallback(const nav_msgs::msg::OccupancyGrid::SharedPtr msg);
 
         rclcpp::Logger logger_{rclcpp::get_logger("ElevationLayer")};
-        rclcpp::Subscription<nav_msgs::msg::OccupancyGrid>::SharedPtr grid_sub_;
+        std::shared_ptr<message_filters::Subscriber<nav_msgs::msg::OccupancyGrid, rclcpp_lifecycle::LifecycleNode>> grid_sub_;
+        std::shared_ptr<message_filters::PassThrough<nav_msgs::msg::OccupancyGrid>> filter_;
+
         std::mutex grid_mutex_;
-        nav_msgs::msg::OccupancyGrid grid_;
+        nav2_costmap_2d::Costmap2D costmap_;
     };
 }
