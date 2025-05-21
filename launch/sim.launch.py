@@ -37,24 +37,33 @@ def generate_launch_description():
         }.items()
     )
 
+    # rsp = IncludeLaunchDescription(
+    #     PythonLaunchDescriptionSource([os.path.join(
+    #         package_share_dir, 'launch', 'rsp.launch.py'
+    #     )]),
+    #     launch_arguments={
+    #         'use_sim_time': 'True'
+    #     }.items()
+    # )
+
     rviz = Node(
         package='rviz2',
         executable='rviz2',
         name='rviz2',
         output='screen',
-        arguments=['-d', os.path.join(package_share_dir, 'config', 'atlas.rviz')]
+        arguments=['-d', os.path.join(package_share_dir, 'config', 'atlas-teb.rviz')]
     )
 
-    ad_ros2_mapping = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource([os.path.join(
-            get_package_share_directory('ad_ros2'), 'launch', 'local_elevation_mapping.launch.py'
-        )])
-    )
+    # ad_ros2_mapping = IncludeLaunchDescription(
+    #     PythonLaunchDescriptionSource([os.path.join(
+    #         get_package_share_directory('ad_ros2'), 'launch', 'local_elevation_mapping.launch.py'
+    #     )])
+    # )
 
     return LaunchDescription([
         gz_sim,
         mrg_slam_sim_robot,
         mrg_slam,
-        ad_ros2_mapping,
+        # ad_ros2_mapping,
         rviz,
     ])

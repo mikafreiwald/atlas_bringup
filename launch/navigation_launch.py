@@ -133,7 +133,8 @@ def generate_launch_description():
     bt_xml_file = os.path.join(
         get_package_share_directory('atlas_bringup'),
         'behavior_trees',
-        'compute_path_to_pose.xml',
+        'navigate_to_pose.xml',
+        # 'navigate_to_pose_w_replanning_and_recovery.xml',
     )
 
     load_nodes = GroupAction(
@@ -191,7 +192,7 @@ def generate_launch_description():
                 output='screen',
                 respawn=use_respawn,
                 respawn_delay=2.0,
-                parameters=[configured_params], # + [{'default_nav_to_pose_bt_xml': bt_xml_file}],
+                parameters=[configured_params] + [{'default_nav_to_pose_bt_xml': bt_xml_file}],
                 arguments=['--ros-args', '--log-level', log_level],
                 remappings=remappings,
             ),
