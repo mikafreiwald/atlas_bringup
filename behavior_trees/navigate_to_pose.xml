@@ -1,0 +1,23 @@
+
+<!--
+  This Behavior Tree replans the global path periodically at 1 Hz and it also has
+  recovery actions specific to planning / control as well as general system issues.
+  This will be continuous if a kinematically valid planner is selected.
+-->
+<root BTCPP_format="4" main_tree_to_execute="MainTree">
+  <BehaviorTree ID="MainTree">
+    <PipelineSequence name="Navigate">
+      <ControllerSelector selected_controller="{selected_controller}" default_controller="FollowPath" topic_name="controller_selector"/>
+      <PlannerSelector selected_planner="{selected_planner}" default_planner="GridBased" topic_name="planner_selector"/>
+      <!-- <SmoothPath unsmoothed_path="{path_raw}" smoothed_path="{path_smooth}" smoother_id="constrained_smoother" error_code_id="{smoother_error_code}"/> -->
+
+      <RecoveryNode number_of_retries="5">
+        <PipelineSequence name="Run">
+          <ComputePathToPose goal="{goal}" path="{path_raw}" planner_id="{selected_planner}" error_code_id="{compute_path_error_code}"/>
+          <FollowPath path="{path_raw}" controller_id="{selected_controller}" error_code_id="{follow_path_error_code}"/>
+        </PipelineSequence>
+        <ClearEntireCostmap name="ClearLocalCostmap-Context" service_name="local_costmap/clear_entirely_local_costmap"/>
+      </RecoveryNode>
+    </PipelineSequence>
+  </BehaviorTree>
+</root>
