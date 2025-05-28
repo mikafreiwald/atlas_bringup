@@ -30,7 +30,7 @@ def generate_launch_description():
                 "robot_radius": 0.7,
                 "min_turn_radius": 0.0,
                 "goal_z_offset": 5.0,
-                "step_width": 1.0,
+                "step_width": 1,
                 "ackermann": False,
             }],
             output="screen"
