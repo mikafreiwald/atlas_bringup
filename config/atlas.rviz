@@ -28,7 +28,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: ""
+    SyncSource: local_map_pc2
 Visualization Manager:
   Class: ""
   Displays:
@@ -57,20 +57,41 @@ Visualization Manager:
       Frame Timeout: 15
       Frames:
         All Enabled: true
+        atlas/base_link:
+          Value: true
+        atlas/keyframe:
+          Value: true
+        atlas/map:
+          Value: true
+        atlas/odom:
+          Value: true
+        atlas/velodyne:
+          Value: true
+        map:
+          Value: true
+        odom:
+          Value: true
       Marker Scale: 1
       Name: TF
       Show Arrows: true
       Show Axes: true
       Show Names: true
       Tree:
-        {}
+        map:
+          atlas/map:
+            atlas/odom:
+              atlas/base_link:
+                atlas/velodyne:
+                  {}
+              atlas/keyframe:
+                {}
       Update Interval: 0
       Value: true
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
-        Max Value: 8.79574203491211
-        Min Value: -0.07978525012731552
+        Max Value: 5.08931827545166
+        Min Value: -1.4297709465026855
         Value: true
       Axis: Z
       Channel Name: intensity
@@ -156,7 +177,7 @@ Visualization Manager:
       Use Timestamp: false
       Value: false
     - Class: nav3d_ros2/HexagonGrid
-      Enabled: true
+      Enabled: false
       Name: hex_grid
       ShowBorders: false
       Topic:
@@ -167,7 +188,7 @@ Visualization Manager:
         Reliability Policy: Reliable
         Value: /atlas/hex_grid
       Transparent: false
-      Value: true
+      Value: false
     - Alpha: 1
       Buffer Length: 1
       Class: rviz_default_plugins/Path
@@ -240,7 +261,7 @@ Visualization Manager:
           Class: rviz_default_plugins/Map
           Color Scheme: map
           Draw Behind: false
-          Enabled: false
+          Enabled: true
           Name: static_layer
           Topic:
             Depth: 5
@@ -256,7 +277,7 @@ Visualization Manager:
             Reliability Policy: Reliable
             Value: /global_costmap/static_layer_updates
           Use Timestamp: false
-          Value: false
+          Value: true
         - Alpha: 0.699999988079071
           Binary representation: false
           Binary threshold: 100
@@ -280,7 +301,7 @@ Visualization Manager:
             Value: /global_costmap/obstacle_layer_updates
           Use Timestamp: false
           Value: false
-      Enabled: true
+      Enabled: false
       Name: global_costmap
     - Class: rviz_common/Group
       Displays:
@@ -290,7 +311,7 @@ Visualization Manager:
           Class: rviz_default_plugins/Map
           Color Scheme: costmap
           Draw Behind: false
-          Enabled: false
+          Enabled: true
           Name: costmap
           Topic:
             Depth: 5
@@ -306,7 +327,7 @@ Visualization Manager:
             Reliability Policy: Reliable
             Value: /local_costmap/costmap_updates
           Use Timestamp: false
-          Value: false
+          Value: true
         - Alpha: 1
           Class: rviz_default_plugins/Polygon
           Color: 255; 25; 0
@@ -373,8 +394,8 @@ Visualization Manager:
         - Alpha: 1
           Autocompute Intensity Bounds: true
           Autocompute Value Bounds:
-            Max Value: 4.205638408660889
-            Min Value: -0.8183323740959167
+            Max Value: 2.3930277824401855
+            Min Value: 0.4906024932861328
             Value: true
           Axis: Z
           Channel Name: intensity
@@ -382,7 +403,7 @@ Visualization Manager:
           Color: 255; 255; 255
           Color Transformer: AxisColor
           Decay Time: 0
-          Enabled: true
+          Enabled: false
           Invert Rainbow: false
           Max Color: 255; 255; 255
           Max Intensity: 127
@@ -402,7 +423,7 @@ Visualization Manager:
             Value: /atlas/local_map_pc2
           Use Fixed Frame: true
           Use rainbow: true
-          Value: true
+          Value: false
       Enabled: true
       Name: local_elevation_mapping
     - Class: rviz_common/Group
@@ -561,25 +582,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 17.8255672454834
+      Distance: 20.118030548095703
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 0.14598768949508667
-        Y: 1.4685182571411133
-        Z: 0.5872801542282104
+        X: -1.4443604946136475
+        Y: 0.027256805449724197
+        Z: -0.46273553371429443
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.6852043271064758
+      Pitch: 0.7802038192749023
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 0.2735988199710846
+      Yaw: 4.4986138343811035
     Saved: ~
 Window Geometry:
   Displays:
