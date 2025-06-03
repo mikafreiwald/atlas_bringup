@@ -14,15 +14,15 @@ namespace atlas_bringup
             const std::string & service_node_name,
             const BT::NodeConfiguration & conf);
 
-        ~PublishMapService();
+        ~PublishMapService() = default;
 
-        BT::NodeStatus tick() override;
-        void halt() override;
+        void on_tick() override;
 
         static BT::PortsList providedPorts()
         {
             return providedBasicPorts({
-                BT::InputPort<double>("resolution", 0.1, "Resolution")
+                BT::InputPort<double>("resolution", 0.1, "Resolution"),
+                BT::InputPort<bool>("skip_first_cloud", false, "Skip first cloud"),
             });
         }
     };

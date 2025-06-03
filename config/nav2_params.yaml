@@ -64,6 +64,7 @@ bt_navigator:
     # Built-in plugins are added automatically
     plugin_lib_names:
       - "hello_world_action"
+      - "publish_map_service"
 
     error_code_names:
       - compute_path_error_code

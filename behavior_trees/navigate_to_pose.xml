@@ -16,7 +16,7 @@
           <ComputePathToPose goal="{goal}" path="{path_raw}" planner_id="{selected_planner}" error_code_id="{compute_path_error_code}"/>
           <FollowPath path="{path_raw}" controller_id="{selected_controller}" error_code_id="{follow_path_error_code}"/>
         </PipelineSequence>
-        <ClearEntireCostmap name="ClearLocalCostmap-Context" service_name="local_costmap/clear_entirely_local_costmap"/>
+        <PublishMap service_name="/atlas/mrg_slam/publish_map" skip_first_cloud="True" resolution="0.1" />
       </RecoveryNode>
     </PipelineSequence>
   </BehaviorTree>

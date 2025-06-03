@@ -75,6 +75,7 @@ target_include_directories(publish_map_service PUBLIC
 ament_target_dependencies(publish_map_service
   behaviortree_cpp
   nav2_util
+  nav2_core
   nav2_behavior_tree
   rclcpp
   mrg_slam_msgs
