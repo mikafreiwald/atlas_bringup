@@ -31,6 +31,14 @@ def generate_launch_description():
         }.items()
     )
 
+    rsp = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource([os.path.join(
+            package_share_dir,'launch','rsp.launch.py'
+        )]), launch_arguments={
+            'use_sim_time': 'true'
+        }.items()
+    )
+
     mrg_slam_sim_robot = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([os.path.join(
             get_package_share_directory('mrg_slam_sim'), 'launch', 'dual_robot_sim.launch.py'
@@ -62,6 +70,7 @@ def generate_launch_description():
 
     return LaunchDescription([
         gz_sim,
+        rsp,
         mrg_slam_sim_robot,
         mrg_slam,
         ad_ros2_mapping,
