@@ -20,6 +20,7 @@ find_package(nav2_behavior_tree REQUIRED)
 find_package(nav2_costmap_2d REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(nav2_dfki_planner REQUIRED)
+find_package(mrg_slam_msgs REQUIRED)
 find_package(ad_ros2 REQUIRED)
 
 if(BUILD_TESTING)
@@ -56,6 +57,34 @@ target_compile_definitions(hello_world_action PRIVATE BT_PLUGIN_EXPORT)
 
 install(
   TARGETS hello_world_action
+  EXPORT export_${PROJECT_NAME}
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  RUNTIME DESTINATION bin
+)
+
+#### PublishMap Action ####
+
+add_library(publish_map_service SHARED
+  src/publish_map_service.cpp
+)
+target_include_directories(publish_map_service PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>"
+)
+ament_target_dependencies(publish_map_service
+  behaviortree_cpp
+  nav2_util
+  nav2_behavior_tree
+  rclcpp
+  mrg_slam_msgs
+)
+
+# necessary for macro BT_REGISTER_NODES to export function
+target_compile_definitions(publish_map_service PRIVATE BT_PLUGIN_EXPORT)
+
+install(
+  TARGETS publish_map_service
   EXPORT export_${PROJECT_NAME}
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
