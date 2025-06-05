@@ -15,8 +15,9 @@ def generate_launch_description():
             package='nav3d_ros2',
             executable='map_creator',
             parameters=[{
-                "grid_size": 0.375,
-                "gap_size": 1.2
+                "use_sim_time": True,
+                "grid_size": 0.2, # 0.375,
+                "gap_size":  0.8, # 1.2,
             }],
             remappings=[('cloud', 'mrg_slam/map_points_service')],
             output="screen"
@@ -26,11 +27,12 @@ def generate_launch_description():
             package='nav3d_ros2',
             executable='path_planner',
             parameters=[{
+                "use_sim_time": True,
                 "robot_frame": "atlas/velodyne",
                 "robot_radius": 0.7,
                 "min_turn_radius": 0.0,
-                "goal_z_offset": 5.0,
-                "step_width": 1,
+                "goal_z_offset": 1.0,
+                "step_width": 1.0,
                 "ackermann": False,
             }],
             output="screen"
