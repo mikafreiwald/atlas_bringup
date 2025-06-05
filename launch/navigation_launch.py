@@ -47,7 +47,7 @@ def generate_launch_description():
         # 'smoother_server',
         'planner_server',
         'behavior_server',
-        # 'velocity_smoother',
+        'velocity_smoother',
         # 'collision_monitor',
         'bt_navigator',
         # 'waypoint_follower',
@@ -150,7 +150,7 @@ def generate_launch_description():
                 respawn_delay=2.0,
                 parameters=[configured_params],
                 arguments=['--ros-args', '--log-level', log_level],
-                remappings=remappings + [('cmd_vel', 'atlas/cmd_vel')],
+                remappings=remappings + [('cmd_vel', 'atlas/cmd_vel_nav')],
             ),
             # Node(
             #     package='nav2_smoother',
@@ -183,7 +183,7 @@ def generate_launch_description():
                 respawn_delay=2.0,
                 parameters=[configured_params],
                 arguments=['--ros-args', '--log-level', log_level],
-                remappings=remappings + [('cmd_vel', 'atlas/cmd_vel')],
+                remappings=remappings + [('cmd_vel', 'atlas/cmd_vel_nav')],
             ),
             Node(
                 package='nav2_bt_navigator',
@@ -207,18 +207,18 @@ def generate_launch_description():
             #     arguments=['--ros-args', '--log-level', log_level],
             #     remappings=remappings,
             # ),
-            # Node(
-            #     package='nav2_velocity_smoother',
-            #     executable='velocity_smoother',
-            #     name='velocity_smoother',
-            #     output='screen',
-            #     respawn=use_respawn,
-            #     respawn_delay=2.0,
-            #     parameters=[configured_params],
-            #     arguments=['--ros-args', '--log-level', log_level],
-            #     remappings=remappings
-            #     + [('cmd_vel', 'cmd_vel_nav')],
-            # ),
+            Node(
+                package='nav2_velocity_smoother',
+                executable='velocity_smoother',
+                name='velocity_smoother',
+                output='screen',
+                respawn=use_respawn,
+                respawn_delay=2.0,
+                parameters=[configured_params],
+                arguments=['--ros-args', '--log-level', log_level],
+                remappings=remappings
+                + [('cmd_vel', 'atlas/cmd_vel_nav'), ('cmd_vel_smoothed', 'atlas/cmd_vel')],
+            ),
             # Node(
             #     package='nav2_collision_monitor',
             #     executable='collision_monitor',
