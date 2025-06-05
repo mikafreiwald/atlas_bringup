@@ -14,9 +14,7 @@ def generate_launch_description():
     # Set Gazebo resource path
     gz_resource_path = SetEnvironmentVariable(
         name='GZ_SIM_RESOURCE_PATH',
-        value=':'.join([
-            os.path.join(package_share_dir, 'worlds'),
-        ])
+        value=PathJoinSubstitution([package_share_dir, 'models'])
     )
 
     sdf_file = LaunchConfiguration('sdf_file')
