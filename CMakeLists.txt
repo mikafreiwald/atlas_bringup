@@ -14,12 +14,15 @@ endif()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
+find_package(ament_cmake_python REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rclpy REQUIRED)
 find_package(nav2_core REQUIRED)
 find_package(nav2_behavior_tree REQUIRED)
 find_package(nav2_costmap_2d REQUIRED)
-find_package(nav_msgs REQUIRED)
 find_package(nav2_dfki_planner REQUIRED)
+find_package(nav_msgs REQUIRED)
+find_package(geometry_msgs REQUIRED)
 find_package(mrg_slam_msgs REQUIRED)
 
 if(BUILD_TESTING)
@@ -108,6 +111,14 @@ install(TARGETS nav2_elevation_costmap_plugin_core
   DESTINATION lib
 )
 
+# Install Python modules
+ament_python_install_package(${PROJECT_NAME})
+
+# Install Python executables
+install(PROGRAMS
+  scripts/nav_to_pose.py
+  DESTINATION lib/${PROJECT_NAME}
+)
 
 
 install(DIRECTORY include/
