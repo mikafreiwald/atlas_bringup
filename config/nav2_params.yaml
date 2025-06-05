@@ -72,16 +72,17 @@ bt_navigator:
 
 controller_server:
   ros__parameters:
-    controller_frequency: 10.0
+    controller_frequency: 20.0
     costmap_update_timeout: 0.30
-    min_x_velocity_threshold: 0.001
+    min_x_velocity_threshold: 0.0001
     min_y_velocity_threshold: 0.5
-    min_theta_velocity_threshold: 0.001
-    failure_tolerance: 0.3
+    min_theta_velocity_threshold: 0.0001
+    failure_tolerance: 0.0
     progress_checker_plugins: ["progress_checker"]
     goal_checker_plugins: ["general_goal_checker"] # "precise_goal_checker"
     controller_plugins: ["FollowPath", "teb_local_planner"]
     use_realtime_priority: false
+    odom_topic: atlas/odom_ground_truth
 
     # Progress checker parameters
     progress_checker:
@@ -97,8 +98,8 @@ controller_server:
     general_goal_checker:
       stateful: True
       plugin: "nav2_controller::SimpleGoalChecker"
-      xy_goal_tolerance: 0.5
-      yaw_goal_tolerance: 0.25
+      xy_goal_tolerance: 0.7 # Tolerance to meet goal completion criteria (m)
+      yaw_goal_tolerance: 6.0 # Tolerance to meet goal completion criteria (rad)
     teb_local_planner:
       plugin: "teb_local_planner::TebLocalPlannerROS"
       odom_topic: "atlas/odom"
@@ -112,21 +113,21 @@ controller_server:
     FollowPath:
       plugin: "nav2_mppi_controller::MPPIController"
       time_steps: 100
-      model_dt: 0.1
-      batch_size: 800
+      model_dt: 0.05
+      batch_size: 1000
       ax_max: 3.0
       ax_min: -3.0
       ay_max: 3.0
       az_max: 3.5
-      vx_std: 0.4
-      vy_std: 0.4
+      vx_std: 0.5
+      vy_std: 0.5
       wz_std: 0.6
       vx_max: 1.0
-      vx_min: -0.35
+      vx_min: -0.5
       vy_max: 1.0
       wz_max: 1.9
       iteration_count: 1
-      prune_distance: 6.0
+      prune_distance: 5.0
       max_robot_pose_search_dist: 5.0
       transform_tolerance: 0.1
       temperature: 0.3
@@ -134,38 +135,51 @@ controller_server:
       motion_model: "DiffDrive"
       visualize: true
       regenerate_noises: true
+      publish_optimal_trajectory: true
       TrajectoryVisualizer:
         trajectory_step: 5
         time_step: 3
       AckermannConstraints:
-        min_turning_r: 0.2
-      critics: [ "ConstraintCritic", "CostCritic", "PathFollowCritic", "PreferForwardCritic", "GoalCritic"]
+        min_turning_r: 0.0
+      critics: [
+        "ConstraintCritic", "CostCritic", "PreferForwardCritic",
+        "PathFollowCritic", "PathAlignCritic", "PathAngleCritic",
+        "GoalCritic"
+      ]
+        # "ObstacleCritic"
+        # "GoalAngleCritic"
+
         # "ConstraintCritic", "CostCritic", "GoalCritic",
         # "GoalAngleCritic", "PathAlignCritic", "PathFollowCritic",
         # "PathAngleCritic", "PreferForwardCritic"]
+      ObstacleCritic:
+        enabled: true
+        cost_power: 1
+        critical_weight: 20.0 # Weight to apply to critic for near collisions closer than collision_margin_distance
+        repulsion_weight: 1.0 # Weight to apply to critic for generally preferring routes in lower cost space.
       ConstraintCritic:
         enabled: true
         cost_power: 1
-        cost_weight: 12.0
-      GoalCritic:
+        cost_weight: 4.0
+      GoalCritic: # incentivizes navigating spatially towards the goal when in reasonable proximity to goal
         enabled: true
         cost_power: 1
         cost_weight: 5.0
-        threshold_to_consider: 1.4
-      GoalAngleCritic:
+        threshold_to_consider: 2.5 # Minimal distance (m) between robot and goal above which goal distance cost considered
+      GoalAngleCritic: #  incentivizes navigating to achieve the angle of the goal posewhen in reasonable proximity to goal
         enabled: true
         cost_power: 1
         cost_weight: 3.0
-        threshold_to_consider: 0.5
+        threshold_to_consider: 1.0 # Minimal distance (m) between robot and goal above which angle goal cost considered
       PreferForwardCritic:
         enabled: true
         cost_power: 1
         cost_weight: 5.0
-        threshold_to_consider: 0.5
+        threshold_to_consider: 2.5
       CostCritic:
         enabled: true
         cost_power: 1
-        cost_weight: 6.0
+        cost_weight: 4.0
         critical_cost: 300.0
         consider_footprint: false # nedds robot footprint if enabled
         collision_cost: 1000000.0
@@ -174,24 +188,24 @@ controller_server:
       PathAlignCritic:
         enabled: true
         cost_power: 1
-        cost_weight: 14.0
-        max_path_occupancy_ratio: 0.05
+        cost_weight: 5.0
+        max_path_occupancy_ratio: 0.1
         trajectory_point_step: 4
-        threshold_to_consider: 0.5
-        offset_from_furthest: 20
+        threshold_to_consider: 2.5
+        offset_from_furthest: 4
         use_path_orientations: false
       PathFollowCritic:
         enabled: true
         cost_power: 1
         cost_weight: 5.0
         offset_from_furthest: 2
-        threshold_to_consider: 1.4
+        threshold_to_consider: 2.5
       PathAngleCritic:
         enabled: true
         cost_power: 1
-        cost_weight: 2.0
+        cost_weight: 3.0
         offset_from_furthest: 4
-        threshold_to_consider: 0.5
+        threshold_to_consider: 2.5
         max_angle_to_furthest: 1.0
         mode: 0
       # TwirlingCritic:
@@ -210,14 +224,14 @@ local_costmap:
       width: 10
       height: 10
       resolution: 0.1
-      robot_radius: 0.7
+      robot_radius: 0.3
       plugins: ["elevation_layer", "inflation_layer"] # voxel_layer inflation_layer elevation_layer
       elevation_layer:
         plugin: "atlas_bringup::ElevationLayer"
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
         cost_scaling_factor: 3.0
-        inflation_radius: 0.7
+        inflation_radius: 1.5
       obstacle_layer:
         plugin: "nav2_costmap_2d::ObstacleLayer"
         enabled: True
@@ -264,7 +278,7 @@ global_costmap:
       publish_frequency: 1.0
       global_frame: atlas/map
       robot_base_frame: atlas/base_link
-      robot_radius: 0.7
+      robot_radius: 0.3
       resolution: 0.05
       track_unknown_space: true
       plugins: ["static_layer", "inflation_layer"] # order is important
@@ -314,10 +328,12 @@ planner_server:
     costmap_update_timeout: 1.0
     GridBased:
       plugin: "nav2_dfki_planner::StraightLine" # "nav2_navfn_planner::NavfnPlanner"
-      plan_service: "/atlas/plan"
       tolerance: 0.5
       use_astar: false
       allow_unknown: true
+      # dfki Planner:
+      plan_service: "/atlas/plan"
+      do_straight_line: true
 
 smoother_server:
   ros__parameters:
@@ -404,7 +420,7 @@ velocity_smoother:
     min_velocity: [-0.5, 0.0, -2.0]
     max_accel: [2.5, 0.0, 3.2]
     max_decel: [-2.5, 0.0, -3.2]
-    odom_topic: "odom"
+    odom_topic: "atlas/odom"
     odom_duration: 0.1
     deadband_velocity: [0.0, 0.0, 0.0]
     velocity_timeout: 1.0
