@@ -48,7 +48,7 @@ bt_navigator:
     default_server_timeout: 20
     wait_for_service_timeout: 1000
     action_server_result_timeout: 900.0
-    navigators: ["navigate_to_pose"] #, "navigate_through_poses"]
+    navigators: ["navigate_to_pose", "navigate_through_poses"]
     cni_navigator:
       plugin: "cni_navigator::NavigateToPoseNavigatorCNI"
     navigate_to_pose:
@@ -65,6 +65,10 @@ bt_navigator:
     plugin_lib_names:
       - "hello_world_action"
       - "publish_map_service"
+      - "get_frontier_pose_closest_to_goal_service"
+      - "get_traversable_pose_closest_to_goal_service"
+      - "is_goal_outside_map_condition"
+      - "no_traversable_path_to_goal"
 
     error_code_names:
       - compute_path_error_code
@@ -333,7 +337,7 @@ planner_server:
       allow_unknown: true
       # dfki Planner:
       plan_service: "/atlas/plan"
-      do_straight_line: true
+      do_straight_line: false
 
 smoother_server:
   ros__parameters:
