@@ -57,6 +57,10 @@ namespace atlas_bringup
         double robot_x, double robot_y, double robot_yaw,
         double *min_x, double *min_y, double *max_x, double *max_y)
     {
+        RCUTILS_UNUSED(robot_x);
+        RCUTILS_UNUSED(robot_y);
+        RCUTILS_UNUSED(robot_yaw);
+
         std::lock_guard<std::mutex> lock(grid_mutex_);
         if (costmap_.getCharMap() == nullptr)
         {
