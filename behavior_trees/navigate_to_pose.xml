@@ -11,12 +11,28 @@
       <PlannerSelector selected_planner="{selected_planner}" default_planner="GridBased" topic_name="planner_selector"/>
       <!-- <SmoothPath unsmoothed_path="{path_raw}" smoothed_path="{path_smooth}" smoother_id="constrained_smoother" error_code_id="{smoother_error_code}"/> -->
 
-      <RecoveryNode number_of_retries="5">
+
+      <RecoveryNode number_of_retries="1">
         <PipelineSequence name="Run">
           <ComputePathToPose goal="{goal}" path="{path_raw}" planner_id="{selected_planner}" error_code_id="{compute_path_error_code}"/>
           <FollowPath path="{path_raw}" controller_id="{selected_controller}" error_code_id="{follow_path_error_code}"/>
         </PipelineSequence>
-        <PublishMap service_name="/atlas/mrg_slam/publish_map" skip_first_cloud="True" resolution="0.1" />
+
+        <PipelineSequence name="Check">
+          <!--
+          <IsGoalOutsideMap> does effectively:
+          <AreErrorCodesPresent error_code="{compute_path_error_code}" error_codes_to_check="[204, 304]"/>
+          -->
+          <IsGoalOutsideMap error_code="{compute_path_error_code}"/>
+          <GetFrontierPoseClosestToGoal service_name="/atlas/get_frontier_pose" goal_pose="{goal}" frontier_pose="{goal}"/>
+        </PipelineSequence>
+
+        <!--
+        <ForceSuccess>
+          <PublishMap service_name="/atlas/mrg_slam/publish_map" skip_first_cloud="True" resolution="0.1" />
+        </ForceSuccess>
+        -->
+
       </RecoveryNode>
     </PipelineSequence>
   </BehaviorTree>
