@@ -232,6 +232,8 @@ local_costmap:
       plugins: ["elevation_layer", "inflation_layer"] # voxel_layer inflation_layer elevation_layer
       elevation_layer:
         plugin: "atlas_bringup::ElevationLayer"
+        map_topic: /atlas/local_occupancy_grid_map
+        fill_radius: 3.5
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
         cost_scaling_factor: 3.0

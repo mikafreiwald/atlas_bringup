@@ -21,6 +21,15 @@ namespace atlas_bringup
             throw std::runtime_error{"Failed to lock node"};
         }
 
+        declareParameter("map_topic", rclcpp::ParameterValue("occupancy_grid_map"));
+        declareParameter("fill_radius", rclcpp::ParameterValue(-1.0));
+
+        std::string topic = node->get_parameter(name_ + "." + "map_topic").as_string();
+        RCLCPP_INFO(logger_, "map_topic = %s", topic.c_str());
+
+        fill_radius_ = node->get_parameter(name_ + "." + "fill_radius").as_double();
+        RCLCPP_INFO(logger_, "fill_radius = %f", fill_radius_);
+
         auto sub_opt = rclcpp::SubscriptionOptions();
         sub_opt.callback_group = callback_group_;
 
@@ -28,7 +37,7 @@ namespace atlas_bringup
 
         grid_sub_ = std::make_shared<message_filters::Subscriber<nav_msgs::msg::OccupancyGrid,
                                                                  rclcpp_lifecycle::LifecycleNode>>(
-            node, "/atlas/local_occupancy_grid_map", custom_qos_profile.get_rmw_qos_profile(), sub_opt);
+            node, topic, custom_qos_profile.get_rmw_qos_profile(), sub_opt);
 
         grid_sub_->unsubscribe();
 
@@ -81,6 +90,12 @@ namespace atlas_bringup
             return;
         }
 
+        double r_sq = fill_radius_;
+        if (fill_radius_ > 0.0)
+        {
+            r_sq = fill_radius_ * fill_radius_;
+        }
+
         for (int i = min_i; i < max_i; ++i)
         {
             for (int j = min_j; j < max_j; ++j)
@@ -91,6 +106,12 @@ namespace atlas_bringup
                 if (costmap_.worldToMap(wx, wy, mx, my))
                 {
                     unsigned char cost = costmap_.getCost(mx, my);
+                    const double dist_sq = wx*wx + wy*wy;
+
+                    if (cost == nav2_costmap_2d::NO_INFORMATION && dist_sq < r_sq)
+                    {
+                        cost = nav2_costmap_2d::FREE_SPACE;
+                    }
                     master_grid.setCost(i, j, cost);
                 }
                 else

@@ -40,5 +40,7 @@ namespace atlas_bringup
 
         std::mutex grid_mutex_;
         nav2_costmap_2d::Costmap2D costmap_;
+
+        double fill_radius_;
     };
 }
