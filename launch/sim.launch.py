@@ -97,6 +97,18 @@ def generate_launch_description():
         prefix='gnome-terminal -- ',
     )
 
+    twist_mux = Node(
+        package='twist_mux',
+        executable='twist_mux',
+        output='screen',
+        remappings={('/cmd_vel_out', '/atlas/cmd_vel')},
+        ros_arguments=['--log-level', 'INFO'],
+        parameters=[
+            {'use_sim_time': True, 'use_stamped': False},
+            os.path.join(package_share_dir, 'config', 'twist_mux_topics.yaml'),
+        ],
+    )
+
     return LaunchDescription([
         DeclareLaunchArgument(
             'dual_robot',
@@ -112,4 +124,5 @@ def generate_launch_description():
         # ad_ros2_mapping,
         rviz,
         bestla_keyboard,
+        twist_mux,
     ])
