@@ -1,0 +1,28 @@
+
+<root BTCPP_format="4" main_tree_to_execute="MainTree">
+  <BehaviorTree ID="MainTree">
+
+    <RepeatWhile>
+      <DebugMessage msg="A" count="1"/>
+      <ForceSuccess>
+        <GoalReached goal="{goal}"/>
+      </ForceSuccess>
+
+    </RepeatWhile>
+
+    <!--
+    <ReactiveSequence name="Navigate">
+
+      <DebugMessage msg="AAAA" count="3"/>
+      <DebugMessage msg="BBBB" count="3"/>
+
+      <Inverter>
+        <DebugMessage msg="CCCC" count="3"/>
+      </Inverter>
+
+      <DebugMessage msg="DDDD" count="3"/>
+
+    </ReactiveSequence>
+    -->
+  </BehaviorTree>
+</root>

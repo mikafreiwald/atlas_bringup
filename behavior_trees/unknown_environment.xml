@@ -1,0 +1,36 @@
+
+<root BTCPP_format="4" main_tree_to_execute="MainTree">
+  <BehaviorTree ID="MainTree">
+    <Sequence name="Navigate">
+      <ProgressCheckerSelector selected_progress_checker="{selected_progress_checker}" default_progress_checker="progress_checker" topic_name="progress_checker_selector"/>
+      <GoalCheckerSelector selected_goal_checker="{selected_goal_checker}" default_goal_checker="general_goal_checker" topic_name="goal_checker_selector"/>
+      <ControllerSelector selected_controller="{selected_controller}" default_controller="RegulatedPurePursuitController" topic_name="controller_selector"/>
+      <PlannerSelector selected_planner="{selected_planner}" default_planner="NavfnPlanner" topic_name="planner_selector"/>
+
+      <RepeatWhile>
+        <!-- Condition: Goal not reached -->
+        <Inverter>
+          <GoalReached goal="{goal}"/>
+        </Inverter>
+        <!-- Do Loop -->
+        <Sequence name="SubNavigate">
+          <PublishMap service_name="/atlas/mrg_slam/publish_map" server_timeout="1000" skip_first_cloud="True" resolution="0.2" />
+          <!-- <DebugMessage msg="AAAA"/> -->
+          <IfThenElse>
+            <!-- Condition: Goal Pose is in unknown Map Cell -->
+            <PoseIsUnknown pose="{goal}"/>
+            <!-- Navigate to closest Frontier -->
+            <Sequence name="NavigateToFrontier">
+              <GetFrontierClosestToGoal service_name="/frontier_closest_to_goal" goal_pose="{goal}" frontier_pose="{frontier_goal}"/>
+              <ComputePathToPose goal="{frontier_goal}" path="{path}" planner_id="{selected_planner}" error_code_id="{compute_path_error_code}" error_msg="{compute_path_error_msg}"/>
+            </Sequence>
+            <!-- Else: Navigate to Goal -->
+            <ComputePathToPose goal="{goal}" path="{path}" planner_id="{selected_planner}" error_code_id="{compute_path_error_code}" error_msg="{compute_path_error_msg}"/>
+          </IfThenElse>
+          <!-- Follow the computed path -->
+          <FollowPath path="{path}" controller_id="{selected_controller}" error_code_id="{follow_path_error_code}" error_msg="{follow_path_error_msg}" goal_checker_id="{selected_goal_checker}" progress_checker_id="{selected_progress_checker}"/>
+        </Sequence>
+      </RepeatWhile>
+    </Sequence>
+  </BehaviorTree>
+</root>
