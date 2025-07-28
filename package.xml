@@ -4,7 +4,7 @@
   <name>atlas_bringup</name>
   <version>0.0.0</version>
   <description>TODO: Package description</description>
-  <maintainer email="serov@uni-bremen.de">vamexcni</maintainer>
+  <maintainer email="mfreiwal@uni-bremen.de">Mika Freiwald</maintainer>
   <license>Apache-2.0</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
@@ -21,6 +21,9 @@
   <depend>nav2_behavior_tree</depend>
   <depend>nav2_costmap_2d</depend>
   <depend>nav2_simple_commander</depend>
+
+  <depend>frontier_interfaces</depend>
+  <depend>frontier_exploration</depend>
 
   <export>
     <build_type>ament_cmake</build_type>

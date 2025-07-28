@@ -23,6 +23,9 @@ find_package(nav2_costmap_2d REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 
+find_package(frontier_interfaces REQUIRED)
+find_package(frontier_exploration REQUIRED)
+
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   # the following line skips the linter which checks for copyrights
@@ -41,6 +44,7 @@ ament_python_install_package(${PROJECT_NAME})
 # Install Python executables
 install(PROGRAMS
   scripts/nav_to_pose.py
+  scripts/clicked_point.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
