@@ -18,10 +18,9 @@ from ament_index_python.packages import get_package_share_directory
 
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, GroupAction, SetEnvironmentVariable
-from launch_ros.actions import PushROSNamespace
 from launch.conditions import IfCondition
-from launch.substitutions import LaunchConfiguration, PythonExpression
-from launch_ros.actions import LoadComposableNodes, SetParameter
+from launch.substitutions import LaunchConfiguration, PythonExpression, EnvironmentVariable
+from launch_ros.actions import LoadComposableNodes, SetParameter, PushRosNamespace
 from launch_ros.actions import Node
 from launch_ros.descriptions import ComposableNode, ParameterFile
 from nav2_common.launch import RewrittenYaml
@@ -31,8 +30,8 @@ def generate_launch_description():
     # Get the launch directory
     bringup_dir = get_package_share_directory('atlas_bringup')
 
-    namespace = LaunchConfiguration('namespace')
-    use_sim_time = LaunchConfiguration('use_sim_time', default='true')
+    namespace = EnvironmentVariable(name='ROBOT_NAME', default_value='atlas')
+    use_sim_time = LaunchConfiguration('use_sim_time')
     autostart = LaunchConfiguration('autostart')
     params_file = LaunchConfiguration('params_file')
     use_composition = LaunchConfiguration('use_composition')
@@ -52,7 +51,8 @@ def generate_launch_description():
         'bt_navigator',
         # 'waypoint_follower',
         # 'docking_server',
-        'map_server',
+        # 'map_server',
+        # 'map_saver_server',
     ]
 
     # Map fully qualified names to relative ones so the node's namespace can be prepended.
@@ -61,7 +61,7 @@ def generate_launch_description():
     # https://github.com/ros/robot_state_publisher/pull/30
     # TODO(orduno) Substitute with `PushNodeRemapping`
     #              https://github.com/ros2/launch_ros/issues/56
-    remappings = [('/tf', 'tf'), ('/tf_static', 'tf_static')]
+    remappings = []  # [('/tf', 'tf'), ('/tf_static', 'tf_static')]
 
     # Create our own temporary YAML files that include substitutions
     param_substitutions = {'autostart': autostart}
@@ -78,10 +78,6 @@ def generate_launch_description():
 
     stdout_linebuf_envvar = SetEnvironmentVariable(
         'RCUTILS_LOGGING_BUFFERED_STREAM', '1'
-    )
-
-    declare_namespace_cmd = DeclareLaunchArgument(
-        'namespace', default_value='', description='Top-level namespace'
     )
 
     declare_use_sim_time_cmd = DeclareLaunchArgument(
@@ -133,14 +129,16 @@ def generate_launch_description():
     bt_xml_file = os.path.join(
         get_package_share_directory('atlas_bringup'),
         'behavior_trees',
-        'navigate_to_pose.xml',
-        # 'navigate_to_pose_w_replanning_and_recovery.xml',
+        # 'debug_tree.xml',
+        # 'frontier_debug.xml',
+        'unknown_environment.xml',
+        # 'navigate_to_pose.xml',
     )
 
     load_nodes = GroupAction(
         condition=IfCondition(PythonExpression(['not ', use_composition])),
         actions=[
-            # PushROSNamespace('atlas'),
+            PushRosNamespace(namespace),
             SetParameter('use_sim_time', use_sim_time),
             Node(
                 package='nav2_controller',
@@ -150,7 +148,10 @@ def generate_launch_description():
                 respawn_delay=2.0,
                 parameters=[configured_params],
                 arguments=['--ros-args', '--log-level', log_level],
-                remappings=remappings + [('cmd_vel', 'atlas/cmd_vel_nav')],
+                remappings=remappings + [
+                    ('cmd_vel', 'cmd_vel_nav'),
+                    ('/trajectories', 'trajectories'), # fix for https://github.com/ros-navigation/navigation2/pull/4912
+                ],
             ),
             # Node(
             #     package='nav2_smoother',
@@ -173,6 +174,7 @@ def generate_launch_description():
                 parameters=[configured_params],
                 arguments=['--ros-args', '--log-level', log_level],
                 remappings=remappings,
+                # prefix='gdbserver localhost:3000',
             ),
             Node(
                 package='nav2_behaviors',
@@ -183,7 +185,7 @@ def generate_launch_description():
                 respawn_delay=2.0,
                 parameters=[configured_params],
                 arguments=['--ros-args', '--log-level', log_level],
-                remappings=remappings + [('cmd_vel', 'atlas/cmd_vel_nav')],
+                remappings=remappings + [('cmd_vel', 'cmd_vel_nav')],
             ),
             Node(
                 package='nav2_bt_navigator',
@@ -216,8 +218,7 @@ def generate_launch_description():
                 respawn_delay=2.0,
                 parameters=[configured_params],
                 arguments=['--ros-args', '--log-level', log_level],
-                remappings=remappings
-                + [('cmd_vel', 'atlas/cmd_vel_nav'), ('cmd_vel_smoothed', 'atlas/cmd_vel')],
+                remappings=remappings + [('cmd_vel', 'cmd_vel_nav'), ('cmd_vel_smoothed', 'cmd_vel_nav_smoothed')],
             ),
             # Node(
             #     package='nav2_collision_monitor',
@@ -241,24 +242,35 @@ def generate_launch_description():
             #     arguments=['--ros-args', '--log-level', log_level],
             #     remappings=remappings,
             # ),
-            Node(
-                package='nav2_map_server',
-                executable='map_server',
-                name='map_server',
-                output='screen',
-                parameters=[{
-                    'yaml_filename': map_file,
-                    'topic_name': '/atlas/map',
-                    'frame_id': '/atlas/map'
-                }]
-            ),
+            # Node(
+            #     package='nav2_map_server',
+            #     executable='map_server',
+            #     name='map_server',
+            #     output='screen',
+            #     parameters=[{
+            #         'yaml_filename': map_file,
+            #         'topic_name': '/atlas/map',
+            #         'frame_id': '/atlas/map'
+            #     }]
+            # ),
+            # Node(
+            #     package='nav2_map_server',
+            #     executable='map_saver_server',
+            #     name='map_saver_server',
+            #     output='screen',
+            #     parameters=[configured_params],
+            # ),
             Node(
                 package='nav2_lifecycle_manager',
                 executable='lifecycle_manager',
                 name='lifecycle_manager_navigation',
                 output='screen',
                 arguments=['--ros-args', '--log-level', log_level],
-                parameters=[{'autostart': autostart}, {'node_names': lifecycle_nodes}],
+                parameters=[
+                    {'autostart': autostart},
+                    {'node_names': lifecycle_nodes},
+                    {'bond_timeout': 0.0},
+                ],
             ),
         ],
     )
@@ -270,7 +282,6 @@ def generate_launch_description():
     ld.add_action(stdout_linebuf_envvar)
 
     # Declare the launch options
-    ld.add_action(declare_namespace_cmd)
     ld.add_action(declare_use_sim_time_cmd)
     ld.add_action(declare_params_file_cmd)
     ld.add_action(declare_autostart_cmd)

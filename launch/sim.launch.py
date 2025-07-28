@@ -27,15 +27,13 @@ def generate_launch_description():
     #      - atlas : -17.42, 8.14, 1.5
     #      - bestla: -16.52 -11.96 1.8
 
-    dual_robot = LaunchConfiguration('dual_robot')
-
     # sdf file needs to have <world name="marsyard2020"> for mrg_slam to work
     gz_sim = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([os.path.join(
             package_share_dir, 'launch', 'gz.launch.py'
         )]),
         launch_arguments={
-            'sdf_file': os.path.join(package_share_dir, 'worlds', 'marsyard2022.sdf')
+            'sdf_file': os.path.join(package_share_dir, 'worlds', 'warehouse.sdf')
         }.items()
     )
 
@@ -44,32 +42,6 @@ def generate_launch_description():
             package_share_dir,'launch','rsp.launch.py'
         )]), launch_arguments={
             'use_sim_time': 'true'
-        }.items()
-    )
-
-    mrg_slam_sim_robot_single = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource([os.path.join(
-            get_package_share_directory('mrg_slam_sim'), 'launch', 'single_robot_sim.launch.py'
-        )]),
-        launch_arguments={
-            'world': 'rubicon',
-        }.items(),
-        condition=UnlessCondition(dual_robot),
-    )
-
-    mrg_slam_sim_robot_dual = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource([os.path.join(
-            get_package_share_directory('mrg_slam_sim'), 'launch', 'dual_robot_sim.launch.py'
-        )]),
-        condition=IfCondition(dual_robot),
-    )
-
-    mrg_slam = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource([os.path.join(
-            get_package_share_directory('mrg_slam'), 'launch', 'mrg_slam.launch.py'
-        )]),
-        launch_arguments={
-            'init_odom_topic': '/atlas/odom_ground_truth',
         }.items()
     )
 
@@ -87,16 +59,6 @@ def generate_launch_description():
         )])
     )
 
-    bestla_keyboard = Node(
-        condition=IfCondition(dual_robot),
-        package='teleop_twist_keyboard',
-        executable='teleop_twist_keyboard',
-        name='teleop_twist_keyboard_node_bestla',
-        remappings=[('/cmd_vel', '/bestla/cmd_vel')],
-        output='screen',
-        prefix='gnome-terminal -- ',
-    )
-
     twist_mux = Node(
         package='twist_mux',
         executable='twist_mux',
@@ -110,19 +72,9 @@ def generate_launch_description():
     )
 
     return LaunchDescription([
-        DeclareLaunchArgument(
-            'dual_robot',
-            default_value='false',
-            description='Use dual (true) or single (false) robot simulation',
-        ),
-
         gz_sim,
         rsp,
-        mrg_slam_sim_robot_single,
-        mrg_slam_sim_robot_dual,
-        mrg_slam,
         # ad_ros2_mapping,
-        rviz,
-        bestla_keyboard,
+        # rviz,
         twist_mux,
     ])
